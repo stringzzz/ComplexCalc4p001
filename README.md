@@ -25,7 +25,7 @@ _ (Space): Clear screen
  
 v: Input to variable
  
-w, x, y, z: Use variable (After v to input, or without v to output stored value)
+w, x, y, z: Use variable (After v to input, or without v to output stored value) (Click 'save' to store the variables in an external file for later use)
  
 (ENTER): Compute
 
