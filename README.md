@@ -30,3 +30,9 @@ w, x, y, z: Use variable (After v to input, or without v to output stored value)
 (ENTER): Compute
 
 After computation, press any operation or function to use the result of the previous computation
+
+To change the calculator's skin: Set line 1 of the 'calcMemory.txt' file in the inclusive range of 0-3:
+0: Blue
+1: Green
+2: Red
+3: Purple
