@@ -21,6 +21,10 @@
 #Version 4.003: Added option to change skins for the calculator by editing calcMemory.txt file (Enter 0-3 on top line)
 #Version 4.003: 'complete' date: 08-02-2023 18:58:30
 
+#Version 4.004: Added allowing of just putting 'i' instead of '1i', as this is more natural and makes sense.
+#Test cases for all parts involving 'i' in input, next
+#Complete: 08-03-2023 17:03:25
+
 
 #Almost complete overhaul of Version 3
 
@@ -73,48 +77,67 @@ def checkPat(pat):
 #This function os a total mess. It made an improvement on the previous version's mess, but could stand for being a lot cleaner.
 #There may be a much better method overall to dealing with this problem of catching the different patterns entirely.
 #An improvement is an improvement, though.
-	if re.search(r"^(-?\d+\.?\d*(\+|-)\d+\.?\d*i)(\+|-|\*|/)(-?\d+\.?\d*(\+|-)\d+\.?\d*i)$", pat):
+
+
+
+#######
+#Note: Put parens around first imag no in regex, fix the group #s accordingly
+#######
+
+	if re.search(r"^(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)(\+|-|\*|/)(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)$", pat):
 		#Complex/Complex
-		m1 = re.match(r"(-?\d+\.?\d*(\+|-)\d+\.?\d*i)(\+|-|\*|/)(-?\d+\.?\d*(\+|-)\d+\.?\d*i)", pat)
+		m1 = re.match(r"(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)(\+|-|\*|/)(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)", pat)
 		
-		m2 = re.match(r"(-?\d+\.?\d*)((\+|-)\d+\.?\d*)i", m1.group(1))
+		m2 = re.match(r"(-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i", m1.group(1))
 		gv.realNo1 = m2.group(1)
-		gv.imagNo1 = m2.group(2)
+		if m2.group(4) != None:
+			gv.imagNo1 = m2.group(2)
+		else:
+			gv.imagNo1 = 1
 		
-		m3 = re.match(r"(-?\d+\.?\d*)((\+|-)\d+\.?\d*)i", m1.group(4))
+		m3 = re.match(r"(-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i", m1.group(5))
 		gv.realNo2 = m3.group(1)
-		gv.imagNo2 = m3.group(2)
+		if m3.group(4) != None:
+			gv.imagNo2 = m3.group(2)
+		else:
+			gv.imagNo2 = 1
 		
-		gv.oper = m1.group(3)
+		gv.oper = m1.group(4)
 		return 1
 		
-	elif re.search(r"^(-?\d+\.?\d*(\+|-)\d+\.?\d*i)(\+|-|\*|/)(-?\d+\.?\d*)$", pat):
+	elif re.search(r"^(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)(\+|-|\*|/)(-?\d+\.?\d*)$", pat):
 		#Complex/Real
-		m1 = re.match(r"(-?\d+\.?\d*(\+|-)\d+\.?\d*i)(\+|-|\*|/)(-?\d+\.?\d*)", pat)
+		m1 = re.match(r"(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)(\+|-|\*|/)(-?\d+\.?\d*)", pat)
 		
-		m2 = re.match(r"(-?\d+\.?\d*)((\+|-)\d+\.?\d*)i", m1.group(1))
+		m2 = re.match(r"(-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i", m1.group(1))
 		gv.realNo1 = m2.group(1)
-		gv.imagNo1 = m2.group(2)
-		
-		m3 = re.match(r"(-?\d+\.?\d*)", m1.group(4))
+		if m2.group(4) != None:
+			gv.imagNo1 = m2.group(2)
+		else:
+			gv.imagNo1 = 1
+			
+		m3 = re.match(r"(-?\d+\.?\d*)", m1.group(5))
 		gv.realNo2 = m3.group(1)
 		gv.imagNo2 = 0
 		
-		gv.oper = m1.group(3)
+		gv.oper = m1.group(4)
 		
 		return 1
 		
-	elif re.search(r"^(-?\d+\.?\d*)(\+|-|\*|/)(-?\d+\.?\d*(\+|-)\d+\.?\d*i)$", pat):
+	elif re.search(r"^(-?\d+\.?\d*)(\+|-|\*|/)(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)$", pat):
 		#Real/Complex
-		m1 = re.match(r"(-?\d+\.?\d*)(\+|-|\*|/)(-?\d+\.?\d*(\+|-)\d+\.?\d*i)", pat)
+		m1 = re.match(r"(-?\d+\.?\d*)(\+|-|\*|/)(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)", pat)
 		
 		m2 = re.match(r"(-?\d+\.?\d*)", m1.group(1))
 		gv.realNo1 = m2.group(1)
 		gv.imagNo1 = 0
 		
-		m3 = re.match(r"(-?\d+\.?\d*)((\+|-)\d+\.?\d*)i", m1.group(3))
+		m3 = re.match(r"(-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i", m1.group(3))
 		gv.realNo2 = m3.group(1)
-		gv.imagNo2 = m3.group(2)
+		if m3.group(4) != None:
+			gv.imagNo2 = m3.group(2)
+		else:
+			gv.imagNo2 = 1
 		
 		gv.oper = m1.group(2)
 		
@@ -136,16 +159,18 @@ def checkPat(pat):
 		
 		return 1
 		
-	elif re.search(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*(\+|-)\d+\.?\d*i)\)$", pat):
+	elif re.search(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)\)$", pat):
 		#Function/Complex
-		m1 = re.match(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*(\+|-)\d+\.?\d*i)\)", pat)
-		
+		m1 = re.match(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)\)", pat)
 		gv.oper = m1.group(1)
 		
-		m2 = re.match(r".*\((-?\d+\.?\d*)((\+|-)\d+\.?\d*)i\)", pat)
+		m2 = re.match(r".*\((-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i\)", pat)
 		gv.realNo1 = m2.group(1)
-		gv.imagNo1 = m2.group(2)
-		
+		if m2.group(4) != None:
+			gv.imagNo1 = m2.group(2)
+		else:
+			gv.imagNo1 = 1
+
 		return 2
 		
 	elif re.search(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*)\)$", pat):
@@ -160,152 +185,172 @@ def checkPat(pat):
 		
 		return 2
 		
-	elif re.search(r"^(-?\d+\.?\d*(\+|-)\d+\.?\d*i)(\+|-|\*|/)(-?\d+\.?\d*)i$", pat):
+	elif re.search(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?(\d+\.?\d*)?)i\)$", pat):
+		#Function/Imag
+		m1 = re.match(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?(\d+\.?\d*)?)i\)$", pat)
+		
+		gv.oper = m1.group(1)
+		
+		m2 = re.match(r".*\((-?(\d+\.?\d*)?)i\)", pat)
+		gv.realNo1 = 0
+		
+		if m2.group(2) != None:
+			gv.imagNo1 = m2.group(1)
+		else:
+			gv.imagNo1 = 1
+		
+		return 2
+		
+	elif re.search(r"^(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)(\+|-|\*|/)(-?(\d+\.?\d*)?)i$", pat):
 		#Complex/Imag
-		m1 = re.match(r"(-?\d+\.?\d*(\+|-)\d+\.?\d*i)(\+|-|\*|/)(-?\d+\.?\d*)i", pat)
+		m1 = re.match(r"(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)(\+|-|\*|/)(-?(\d+\.?\d*)?)i", pat)
 		
-		m2 = re.match(r"(-?\d+\.?\d*)((\+|-)\d+\.?\d*)i", m1.group(1))
+		m2 = re.match(r"(-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i", m1.group(1))
 		gv.realNo1 = m2.group(1)
-		gv.imagNo1 = m2.group(2)
-		
-		m3 = re.match(r"(-?\d+\.?\d*)", m1.group(4))
+		if m2.group(4) != None:
+			gv.imagNo1 = m2.group(2)
+		else:
+			gv.imagNo1 = 1
+			
+		m3 = re.match(r"(-?\d+\.?\d*)?", m1.group(4))
 		gv.realNo2 = 0
-		gv.imagNo2 = m3.group(1)
+		if m3.group(1) != None:
+			gv.imagNo2 = m3.group(1)
+		else:
+			gv.imagNo2 = 1
+			
+		gv.oper = m1.group(4)
+		
+		return 3
+		
+	elif re.search(r"^(-?\d+\.?\d*)?i(\+|-|\*|/)(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)$", pat):
+		#Imag/Complex
+		m1 = re.match(r"((-?\d+\.?\d*)?i)(\+|-|\*|/)(-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)", pat)
+		
+		m2 = re.match(r"(-?\d+\.?\d*)?i", m1.group(1))
+		gv.realNo1 = 0
+		if m2.group(1) != None:
+			gv.imagNo1 = m2.group(1)
+		else:
+			gv.imagNo1 = 1
+			
+		m3 = re.match(r"(-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i", m1.group(4))
+		gv.realNo2 = m3.group(1)
+		if m3.group(4) != None:
+			gv.imagNo2 = m3.group(2)
+		else:
+			gv.imagNo2 = 1
 		
 		gv.oper = m1.group(3)
 		
 		return 3
 		
-	elif re.search(r"^(-?\d+\.?\d*)i(\+|-|\*|/)(-?\d+\.?\d*(\+|-)\d+\.?\d*i)$", pat):
-		#Imag/Complex
-		m1 = re.match(r"(-?\d+\.?\d*)i(\+|-|\*|/)(-?\d+\.?\d*(\+|-)\d+\.?\d*i)", pat)
-		
-		m2 = re.match(r"(-?\d+\.?\d*)", m1.group(1))
-		gv.realNo1 = 0
-		gv.imagNo1 = m2.group(1)
-		
-		m3 = re.match(r"(-?\d+\.?\d*)((\+|-)\d+\.?\d*)i", m1.group(3))
-		gv.realNo2 = m3.group(1)
-		gv.imagNo2 = m3.group(2)
-		
-		gv.oper = m1.group(2)
-		
-		return 3
-		
-	elif re.search(r"^(-?\d+\.?\d*)i(\+|-|\*|/)(-?\d+\.?\d*)i$", pat):
+	elif re.search(r"^(-?(\d+\.?\d*)?)i(\+|-|\*|/)(-?(\d+\.?\d*)?)i$", pat):
 		#Imag/Imag
-		m1 = re.match(r"(-?\d+\.?\d*)i(\+|-|\*|/)(-?\d+\.?\d*)i", pat)
+		m1 = re.match(r"(-?(\d+\.?\d*)?)i(\+|-|\*|/)(-?(\d+\.?\d*)?)i", pat)
 
 		gv.realNo1 = 0
-		gv.imagNo1 = m1.group(1)
+		if m1.group(2) != None:
+			gv.imagNo1 = m1.group(1)
+		else:
+			gv.imagNo1 = 1
 		
 		gv.realNo2 = 0
-		gv.imagNo2 = m1.group(3)
+		if m1.group(5) != None:
+			gv.imagNo2 = m1.group(4)
+		else:
+			gv.imagNo2 = 1
 		
-		gv.oper = m1.group(2)
+		gv.oper = m1.group(3)
 		
 		return 3
 		
-	elif re.search(r"^(-?\d+\.?\d*)i(\+|-|\*|/)(-?\d+\.?\d*)$", pat):
+	elif re.search(r"^(-?(\d+\.?\d*)?)i(\+|-|\*|/)(-?\d+\.?\d*)$", pat):
 		#Imag/Real
-		m1 = re.match(r"(-?\d+\.?\d*)i(\+|-|\*|/)(-?\d+\.?\d*)", pat)
+		m1 = re.match(r"(-?(\d+\.?\d*)?)i(\+|-|\*|/)(-?\d+\.?\d*)", pat)
 
 		gv.realNo1 = 0
-		gv.imagNo1 = m1.group(1)
+		if m1.group(2) != None:
+			gv.imagNo1 = m1.group(1)
+		else:
+			gv.imagNo1 = 1
 		
-		gv.realNo2 = m1.group(3)
+		gv.realNo2 = m1.group(4)
 		gv.imagNo2 = 0
 		
-		gv.oper = m1.group(2)
+		gv.oper = m1.group(3)
 		
 		return 3
 	
-	elif re.search(r"^(-?\d+\.?\d*)(\+|-|\*|/)(-?\d+\.?\d*)i$", pat):
+	elif re.search(r"^(-?\d+\.?\d*)(\+|-|\*|/)(-?(\d+\.?\d*)?)i$", pat):
 		#Real/Imag
-		m1 = re.match(r"(-?\d+\.?\d*)(\+|-|\*|/)(-?\d+\.?\d*)i", pat)
+		m1 = re.match(r"(-?\d+\.?\d*)(\+|-|\*|/)(-?(\d+\.?\d*)?)i", pat)
 
 		gv.realNo1 = m1.group(1)
 		gv.imagNo1 = 0
 		
 		gv.realNo2 = 0
-		gv.imagNo2 = m1.group(3)
+		if m1.group(4) != None:
+			gv.imagNo2 = m1.group(3)
+		else:
+			gv.imagNo2 = 1
 		
 		gv.oper = m1.group(2)
 		
+		
 		return 3
 		
-	elif re.search(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*(\+|-)\d+\.?\d*i)\)$", pat):
-		#Function/Complex
-		m1 = re.match(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*(\+|-)\d+\.?\d*i)\)", pat)
-		
-		gv.oper = m1.group(1)
-		
-		m2 = re.match(r".*\((-?\d+\.?\d*)((\+|-)\d+\.?\d*)i\)", pat)
-		gv.realNo1 = m2.group(1)
-		gv.imagNo1 = m2.group(2)
-		
-		return 4
-		
-	elif re.search(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*)\)$", pat):
-		#Function/Real
-		m1 = re.match(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*)\)$", pat)
-		
-		gv.oper = m1.group(1)
-		
-		m2 = re.match(r".*\((-?\d+\.?\d*)\)", pat)
-		gv.realNo1 = m2.group(1)
-		gv.imagNo1 = 0
-		
-		return 4
-	
-	elif re.search(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*)i\)$", pat):
-		#Function/Imag
-		m1 = re.match(r"^(Mod|Arg|e\^|Log|Sin|Cos|Tan|Inv)\((-?\d+\.?\d*)i\)$", pat)
-		
-		gv.oper = m1.group(1)
-		
-		m2 = re.match(r".*\((-?\d+\.?\d*)i\)", pat)
-		gv.realNo1 = 0
-		gv.imagNo1 = m2.group(1)
-		
-		return 4
-		
-	elif re.search(r"^Pow\((-?\d+\.?\d*(\+|-)\d+\.?\d*i)\, (-?\d+\.?\d*(\+|-)\d+\.?\d*i)\)$", pat):
+	elif re.search(r"^Pow\((-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)\, (-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)\)$", pat):
 		#Pow:Complex/Complex
-		m1 = re.match(r"^Pow\(((-?\d+\.?\d*)((\+|-)\d+\.?\d*)i)\, ((-?\d+\.?\d*)((\+|-)\d+\.?\d*)i)\)$", pat)
+		m1 = re.match(r"^Pow\(((-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i)\, ((-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i)\)$", pat)
 		
 		gv.oper = 'Pow'
 		
 		gv.realNo1 = m1.group(2)
-		gv.imagNo1 = m1.group(3)
-		gv.realNo2 = m1.group(6)
-		gv.imagNo2 = m1.group(7)
+		if m1.group(5) != None:
+			gv.imagNo1 = m1.group(5)
+		else:
+			gv.imagNo1 = 1
+		
+		gv.realNo2 = m1.group(7)
+		if m1.group(10) != None:
+			gv.imagNo2 = m1.group(8)
+		else:
+			gv.imagNo2 = 1
 		
 		return 5
 		
-	elif re.search(r"^Pow\((-?\d+\.?\d*(\+|-)\d+\.?\d*i)\, (-?\d+\.?\d*)\)$", pat):
+	elif re.search(r"^Pow\((-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)\, (-?\d+\.?\d*)\)$", pat):
 		#Pow:Complex/Real
-		m1 = re.match(r"^Pow\(((-?\d+\.?\d*)((\+|-)\d+\.?\d*)i)\, (-?\d+\.?\d*)\)$", pat)
+		m1 = re.match(r"^Pow\(((-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i)\, (-?\d+\.?\d*)\)$", pat)
 		
 		gv.oper = 'Pow'
 		
 		gv.realNo1 = m1.group(2)
-		gv.imagNo1 = m1.group(3)
-		gv.realNo2 = m1.group(5)
+		if m1.group(5) != None:
+			gv.imagNo1 = m1.group(3)
+		else:
+			gv.imagNo1 = 1
+		
+		gv.realNo2 = m1.group(6)
 		gv.imagNo2 = 0
 		
 		return 5
 		
-	elif re.search(r"^Pow\((-?\d+\.?\d*)\, (-?\d+\.?\d*(\+|-)\d+\.?\d*i)\)$", pat):
+	elif re.search(r"^Pow\((-?\d+\.?\d*)\, (-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)\)$", pat):
 		#Pow:Real/Complex
-		m1 = re.match(r"^Pow\((-?\d+\.?\d*)\, ((-?\d+\.?\d*)((\+|-)\d+\.?\d*)i)\)$", pat)
+		print(gv.expression)
+		m1 = re.match(r"^Pow\((-?\d+\.?\d*)\, ((-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i)\)$", pat)
 		
 		gv.oper = 'Pow'
 		
 		gv.realNo1 = m1.group(1)
 		gv.imagNo1 = 0
 		gv.realNo2 = m1.group(3)
-		gv.imagNo2 = m1.group(4)
+		if m1.group(6) != None:
+			gv.imagNo2 = m1.group(4)
+		else:
+			gv.imagNo2 = 1
 		
 		return 5
 		
@@ -320,36 +365,82 @@ def checkPat(pat):
 		gv.imagNo2 = 0
 		
 		return 5
+		
+	elif re.search(r"^Pow\((-?\d+\.?\d*)\, (-?(\d+\.?\d*)?)i\)$", pat):
+		#Pow:Real/Imag
+		m1 = re.match(r"^Pow\((-?\d+\.?\d*)\, (-?(\d+\.?\d*)?)i\)$", pat)
+		gv.oper = 'Pow'
+		
+		gv.realNo1 = m1.group(1)
+		gv.imagNo1 = 0
+		gv.realNo2 = 0
+		if m1.group(3) != None:
+			gv.imagNo2 = m1.group(2)
+		else:
+			gv.imagNo2 = 1
+			
+		return 5
 	
-	elif re.search(r"^Pow\((-?\d+\.?\d*(\+|-)\d+\.?\d*i)\, (-?\d+\.?\d*)i\)$", pat):
+	elif re.search(r"^Pow\((-?(\d+\.?\d*)?)i\, (-?\d+\.?\d*)\)$", pat):
+		#Pow:Imag/Real
+		m1 = re.match(r"^Pow\((-?(\d+\.?\d*)?)i\, (-?\d+\.?\d*)\)$", pat)
+		gv.oper = 'Pow'
+		
+		gv.realNo1 = 0
+		if m1.group(2) != None:
+			gv.imagNo1 = m1.group(1)
+		else:
+			gv.imagNo1 = 1
+		
+		gv.realNo2 = m1.group(3)
+		gv.imagNo2 = 0
+		
+		return 5
+		
+	elif re.search(r"^Pow\((-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)\, (-?(\d+\.?\d*)?)i\)$", pat):
 		#Pow:Complex/Imag
-		m1 = re.match(r"^Pow\(((-?\d+\.?\d*)((\+|-)\d+\.?\d*)i)\, (-?\d+\.?\d*)i\)$", pat)
+		m1 = re.match(r"^Pow\(((-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i)\, (-?(\d+\.?\d*)?)i\)$", pat)
 		
 		gv.oper = 'Pow'
 		
 		gv.realNo1 = m1.group(2)
-		gv.imagNo1 = m1.group(3)
+		if m1.group(5) != None:
+			gv.imagNo1 = m1.group(3)
+		else:
+			gv.imagNo1 = 1
+			
 		gv.realNo2 = 0
-		gv.imagNo2 = m1.group(5)
+		if m1.group(7) != None:
+			gv.imagNo2 = m1.group(6)
+		else:
+			gv.imagNo2 = 1
+		
 		
 		return 5
 		
-	elif re.search(r"^Pow\((-?\d+\.?\d*)i\, (-?\d+\.?\d*(\+|-)\d+\.?\d*i)\)$", pat):
+	elif re.search(r"^Pow\((-?(\d+\.?\d*)?)i\, (-?\d+\.?\d*(\+|-)(\d+\.?\d*)?i)\)$", pat):
 		#Pow:Imag/Complex
-		m1 = re.match(r"^Pow\((-?\d+\.?\d*)i\, ((-?\d+\.?\d*)((\+|-)\d+\.?\d*)i)\)$", pat)
+		m1 = re.match(r"^Pow\((-?(\d+\.?\d*)?)i\, ((-?\d+\.?\d*)((\+|-)(\d+\.?\d*)?)i)\)$", pat)
 		
 		gv.oper = 'Pow'
 		
 		gv.realNo1 = 0
-		gv.imagNo1 = m1.group(1)
-		gv.realNo2 = m1.group(3)
-		gv.imagNo2 = m1.group(4)
+		if m1.group(2) != None:
+			gv.imagNo1 = m1.group(1)
+		else:
+			gv.imagNo1 = 1
+		
+		gv.realNo2 = m1.group(4)
+		if m1.group(7) != None:
+			gv.imagNo2 = m1.group(5)
+		else:
+			gv.imagNo2 = 1
 		
 		return 5
 		
-	elif re.search(r"^Pow\((-?\d+\.?\d*)i\, (-?\d+\.?\d*)i\)$", pat):
+	elif re.search(r"^Pow\((-?(\d+\.?\d*)?)i\, (-?(\d+\.?\d*)?)i\)$", pat):
 		#Pow:Imag/Imag
-		m1 = re.match(r"^Pow\((-?\d+\.?\d*)i\, (-?\d+\.?\d*)i\)$", pat)
+		m1 = re.match(r"^Pow\((-?(\d+\.?\d*)?)i\, (-?(\d+\.?\d*)?)i\)$", pat)
 		gv.oper = 'Pow'
 		
 		gv.realNo1 = 0
